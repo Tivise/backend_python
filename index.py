@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from routes.steam_routes import initialize_steam_routes
 from routes.game_routes import initialize_game_routes
 import jwt
@@ -6,8 +7,10 @@ import jwt
 from middleware.auth import token_required
 
 app = Flask(__name__)
+CORS(app)
 # JWT - TOKEN
 app.config['JWT_SECRET_KEY'] = 'TU VOIS ROMAIN JE FAIS ATTENTION A L\'ENLEVER'
+app.config['JWT_SECRET_KEY'] = '************'
 # get_jwt_identity(): recupere l'identite de l'utilisateur (a utiliser dans les middlewares).
 
 

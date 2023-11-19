@@ -14,8 +14,8 @@ import requests
 # Requirements: Authentification token
 ##############################################################################
 @token_required
-def get_game_user_information():
-    steamID = request.args.get('steamID')
+def get_game_user_information(steamID):
+    print(steamID)
     if steamID:
 
         try:
@@ -29,6 +29,7 @@ def get_game_user_information():
 
             # Compte trouvé
             if game_user_data:
+                print("Envois des données utilisateurs")
                 return jsonify(game_user_data), 200
 
             # Creer un compte de jeu a son compte STEAM

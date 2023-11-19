@@ -18,12 +18,14 @@ def token_required(f):
         try:
             data=jwt.decode(token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
             print(data)
-            if data is None:
+            if data['steamID'] is None:
                 return {
                 "message": "Invalid Authentication token!",
                 "data": None,
                 "error": "Unauthorized"
             }, 401
+            else:
+                steamID = data['steamID']
         except Exception as e:
             return {
                 "message": "Something went wrong",
@@ -31,6 +33,6 @@ def token_required(f):
                 "error": str(e)
             }, 500
 
-        return f(*args, **kwargs)
+        return f(steamID, *args, **kwargs)
 
     return decorated
