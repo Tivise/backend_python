@@ -15,21 +15,20 @@ import requests
 ##############################################################################
 @token_required
 def get_game_user_information(steamID):
-    print(steamID)
     if steamID:
 
         try:
             conn = get_mysql_connection()
             cursor = conn.cursor()
 
-            query = f'SELECT accountId, username, mail, coin, redzap, vip, level, win, lose, avatarId, kills, userId, experience FROM user WHERE accountId = \'{steamID}\''
+            query = f'SELECT accountId, username, avatarId, steamprofile, level, win, lose FROM user WHERE accountId = \'{steamID}\''
             cursor.execute(query)
             game_user_data = cursor.fetchone()
             cursor.close()
 
             # Compte trouvé
             if game_user_data:
-                print("Envois des données utilisateurs")
+                update_game_account(game_user_data)
                 return jsonify(game_user_data), 200
 
             # Creer un compte de jeu a son compte STEAM
@@ -57,10 +56,10 @@ def create_game_account(steamID):
         conn = get_mysql_connection()
         player_data = get_steam_user_information_local(steamID)
         cursor = conn.cursor()
-        query = "INSERT INTO user (accountId, username ,password ,mail) VALUES ('"+steamID+"', '"+player_data['personaname']+"', '---', '---')"
+        query = "INSERT INTO user (accountId, username ,avatarId ,steamprofile) VALUES ('"+player_data['steamid']+"', '"+player_data['personaname']+"', '"+player_data['avatarmedium']+"', '"+player_data['profileurl']+"')"
         cursor.execute(query)
 
-        query2 = f'SELECT accountId, username, mail, coin, redzap, vip, level, win, lose, avatarId, kills, userId, experience FROM user WHERE accountId = \'{steamID}\''
+        query2 = f'SELECT accountId, username, avatarId, steamprofile, level, win, lose FROM user WHERE accountId = \'{steamID}\''
         cursor.execute(query2)
         game_user_data = cursor.fetchone()
 
@@ -69,6 +68,29 @@ def create_game_account(steamID):
 
     except Exception as e:
         return jsonify({'msg':'An error occured while creating an account for the user: ' + steamID}), 400
+
+##############################################################################
+# create_game_account:
+# 
+# Permet de mettre a jour les informations de la base de donnes si le joueur
+# s'est renomme sur Steam par exemple.
+# 
+# Parameter: game_data : Informations du joueur (donnees de la base de donnes)
+##############################################################################
+def update_game_account(game_data):
+    try:
+        conn = get_mysql_connection()
+        player_data = get_steam_user_information_local(game_data[0])
+        cursor = conn.cursor()
+        query = "UPDATE user SET username = '"+player_data['personaname']+"',avatarId='"+player_data['avatarmedium']+"', steamprofile='"+player_data['profileurl']+"' WHERE accountId='"+player_data['steamid']+"'"
+        cursor.execute(query)
+
+        cursor.close()
+    except Exception as e:
+        return jsonify({'msg':'An error occured while updating an account for the user: ' + steamID}), 400
+
+
+
 
 
 ##############################################################################
@@ -81,8 +103,7 @@ def create_game_account(steamID):
 # Requirements: Authentification token
 ##############################################################################
 @token_required
-def set_game_user_mail():
-    steamID = request.args.get('steamID')
+def set_game_user_mail(steamID):
     mail = request.args.get('mail')
     if steamID and mail:
 
@@ -113,8 +134,7 @@ def set_game_user_mail():
 # Requirements: Authentification token
 ##############################################################################
 @token_required
-def delete_game_user():
-    steamID = request.args.get('steamID')
+def delete_game_user(steamID):
     if steamID:
         try:
             conn = get_mysql_connection()
@@ -132,3 +152,39 @@ def delete_game_user():
 
     else:
         return jsonify({'msg': 'Missing steamID'}), 400
+
+
+
+##############################################################################
+# GetRanking:
+#
+# Permet d'obtenir le classement des joueurs
+#
+# Parametres: s
+# Requirements: Authentification token
+##############################################################################
+def get_ranking():
+        try:
+            conn = get_mysql_connection()
+            cursor = conn.cursor(dictionary=True)
+
+            query = f'SELECT accountId, username, avatarId, steamprofile, level, win, lose FROM user'
+            cursor.execute(query)
+
+
+            # Aucun utilisateur n'est trouvé
+            if cursor.rowcount == -1:
+                return jsonify({'msg': 'Empty user list'}), 500
+
+
+            data = cursor.fetchall()
+            cursor.close()
+
+            if data:
+                return jsonify(data), 200
+            else:
+                return jsonify({'msg': 'An error occurred while fetching ranking data', 'error': str(e)}), 500
+        except Exception as e:
+            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur approprié
+            return jsonify({'msg': 'An error occurred while fetching ranking data', 'error': str(e)}), 500
+

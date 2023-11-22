@@ -1,8 +1,8 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
+from middleware.auth import token_required
 import requests
 
-STEAM_WEB_API_KEY = '------------'
 
 
 
@@ -15,9 +15,8 @@ STEAM_WEB_API_KEY = '------------'
 # Parametres: steamID
 # Requirements: Authentification token
 ##############################################################################
-@jwt_required()
-def get_steam_user_information():
-    steamID = request.args.get('steamID')
+@token_required
+def get_steam_user_information(steamID):
     if steamID:
         try:
             response = requests.get(f"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={STEAM_WEB_API_KEY}&steamids={steamID}")
