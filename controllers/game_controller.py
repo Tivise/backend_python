@@ -164,27 +164,33 @@ def delete_game_user(steamID):
 # Requirements: Authentification token
 ##############################################################################
 def get_ranking():
+    pageNumber = request.args.get('pageNumber')
+    filterName = request.args.get('filterName')
+    numberPerPage = request.args.get('numberPerPage')
+    
+    if pageNumber and numberPerPage:
         try:
             conn = get_mysql_connection()
             cursor = conn.cursor(dictionary=True)
 
-            query = f'SELECT accountId, username, avatarId, steamprofile, level, win, lose FROM user'
+            # Calcul du début de l'index pour la pagination
+            index = (int(pageNumber) - 1) * int(numberPerPage)
+
+            # Construction de la requête SQL en fonction des paramètres
+            query_count = f'SELECT COUNT(*) as total FROM user WHERE username LIKE \'%{filterName}%\''
+            cursor.execute(query_count)
+            total = cursor.fetchone()['total']
+            query = f'SELECT accountId, username, avatarId, steamprofile, level, win, lose FROM user WHERE username LIKE \'%{filterName}%\' LIMIT {int(numberPerPage)} OFFSET {index}'
             cursor.execute(query)
-
-
-            # Aucun utilisateur n'est trouvé
-            if cursor.rowcount == -1:
-                return jsonify({'msg': 'Empty user list'}), 500
-
 
             data = cursor.fetchall()
             cursor.close()
 
             if data:
-                return jsonify(data), 200
+                return jsonify({'result' : data, 'total': total}), 200
             else:
-                return jsonify({'msg': 'An error occurred while fetching ranking data', 'error': str(e)}), 500
+                return jsonify({'msg': 'No data found for the given filter'}), 404
         except Exception as e:
-            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur approprié
             return jsonify({'msg': 'An error occurred while fetching ranking data', 'error': str(e)}), 500
-
+    else:
+        return jsonify({'msg': 'Empty pageNumber | numberPerPage'}), 400
