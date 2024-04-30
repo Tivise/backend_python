@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from routes.steam_routes import initialize_steam_routes
 from routes.game_routes import initialize_game_routes
+from routes.bdt_routes import initialize_bdt_routes
 import jwt
 import os
 
@@ -16,6 +17,7 @@ CORS(app)
 # ROUTES
 initialize_steam_routes(app)
 initialize_game_routes(app)
+initialize_bdt_routes(app)
 
 # Exemple de route nécessitant un jeton JWT
 @app.route('/protected', methods=['GET'])

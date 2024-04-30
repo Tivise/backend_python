@@ -26,7 +26,7 @@ def get_game_user_information(steamID):
             game_user_data = cursor.fetchone()
             cursor.close()
 
-            # Compte trouvé
+            # Compte trouvÃ©
             if game_user_data:
                 update_game_account(game_user_data)
                 return jsonify(game_user_data), 200
@@ -36,7 +36,7 @@ def get_game_user_information(steamID):
                 return create_game_account(steamID)
 
         except Exception as e:
-            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur approprié
+            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur appropriÃ©
             return jsonify({'msg': 'An error occurred while fetching Steam user data', 'error': str(e)}), 500
 
 
@@ -117,7 +117,7 @@ def set_game_user_mail(steamID):
             return jsonify({'msg' : 'Mail updated'}), 200
 
         except Exception as e:
-            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur approprié
+            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur appropriÃ©
             return jsonify({'msg': 'An error occurred while editing game user mail', 'error': str(e)}), 500
 
 
@@ -146,7 +146,7 @@ def delete_game_user(steamID):
             return jsonify({'msg' : 'User deleted'}), 200
 
         except Exception as e:
-            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur approprié
+            # En cas d'erreur, imprimez l'erreur ou retournez un message d'erreur appropriÃ©
             return jsonify({'msg': 'An error occurred while removing an user', 'error': str(e)}), 500
 
 
@@ -173,10 +173,10 @@ def get_ranking():
             conn = get_mysql_connection()
             cursor = conn.cursor(dictionary=True)
 
-            # Calcul du début de l'index pour la pagination
+            # Calcul du dÃ©but de l'index pour la pagination
             index = (int(pageNumber) - 1) * int(numberPerPage)
 
-            # Construction de la requête SQL en fonction des paramètres
+            # Construction de la requÃªte SQL en fonction des paramÃ¨tres
             query_count = f'SELECT COUNT(*) as total FROM user WHERE username LIKE \'%{filterName}%\''
             cursor.execute(query_count)
             total = cursor.fetchone()['total']
